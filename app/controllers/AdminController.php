@@ -139,5 +139,53 @@ class AdminController extends Controller {
             exit();
         }
     }
+
+    // เมธอดใหม่: หน้าตั้งค่าระบบ
+    public function settings(){
+        // เรียก Model ใหม่
+        $this->settingModel = $this->model('Setting');
+
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            $settingsToUpdate = [
+                'site_name' => trim($_POST['site_name']),
+                'theme_color' => $_POST['theme_color'],
+                'doc_number_format' => $_POST['doc_number_format'],
+                'doc_registration_counter' => (int)$_POST['doc_registration_counter']
+            ];
+
+            // --- จัดการการอัปโหลดไฟล์ ---
+            $uploadDir = 'uploads/system/';
+            if (!file_exists($uploadDir)) { mkdir($uploadDir, 0777, true); }
+
+            // จัดการ Logo
+            if(isset($_FILES['site_logo']) && $_FILES['site_logo']['error'] == UPLOAD_ERR_OK){
+                $logoPath = $uploadDir . 'logo_' . time() . '_' . $_FILES['site_logo']['name'];
+                if(move_uploaded_file($_FILES['site_logo']['tmp_name'], $logoPath)){
+                    $settingsToUpdate['site_logo'] = $logoPath;
+                }
+            }
+            // จัดการ Favicon
+            if(isset($_FILES['site_favicon']) && $_FILES['site_favicon']['error'] == UPLOAD_ERR_OK){
+                $faviconPath = $uploadDir . 'favicon_' . time() . '_' . $_FILES['site_favicon']['name'];
+                if(move_uploaded_file($_FILES['site_favicon']['tmp_name'], $faviconPath)){
+                    $settingsToUpdate['site_favicon'] = $faviconPath;
+                }
+            }
+            // --- จบการจัดการไฟล์ ---
+
+            if($this->settingModel->updateSettings($settingsToUpdate)){
+                flash('setting_success', 'บันทึกการตั้งค่าเรียบร้อยแล้ว');
+                header('location: ' . URLROOT . '/admin/settings');
+                exit();
+            } else { die('Something went wrong'); }
+
+        } else {
+            // โหลดหน้าฟอร์ม
+            $settings = $this->settingModel->getAllSettings();
+            $data = ['settings' => $settings];
+            $this->view('admin/settings', $data);
+        }
+    }
 }
 ?>

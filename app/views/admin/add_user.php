@@ -6,7 +6,7 @@
             <?php require_once '_form.php'; ?>
             <div class="mt-6 flex justify-end space-x-4">
                 <a href="<?php echo URLROOT; ?>/admin" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-full hover:bg-gray-400">ยกเลิก</a>
-                <button type="submit" class="bg-pink-500 text-white font-bold py-2 px-4 rounded-full hover:bg-pink-600">บันทึก</button>
+                <button type="submit" class="bg-[var(--theme-color)] text-white font-bold py-2 px-4 rounded-full hover:bg-[var(--theme-color-hover)]">บันทึก</button>
             </div>
         </form>
     </div>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db:3306
--- Generation Time: Oct 31, 2025 at 07:50 AM
+-- Generation Time: Oct 31, 2025 at 08:31 AM
 -- Server version: 8.0.44
 -- PHP Version: 8.3.26
 
@@ -97,6 +97,20 @@ CREATE TABLE `settings` (
   `setting_key` varchar(100) NOT NULL,
   `setting_value` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `settings`
+--
+
+INSERT INTO `settings` (`id`, `setting_key`, `setting_value`) VALUES
+(1, 'doc_registration_counter', '1996'),
+(2, 'site_name', 'eDMS - ระบบสารบรรณอิเล็กทรอนิกส์'),
+(3, 'site_logo', 'uploads/system/logo_1761898484_เตรียมอุดมศึกษา ภาคเหนือ.png'),
+(4, 'site_favicon', 'uploads/system/favicon_1761898401_favicon-32x32.png'),
+(5, 'theme_color', '#fe86f4'),
+(6, 'doc_number_format', 'continuous'),
+(30, 'bg_gradient_start', '#fbc2eb'),
+(31, 'bg_gradient_end', '#a6c1ee');
 
 -- --------------------------------------------------------
 
@@ -194,7 +208,7 @@ ALTER TABLE `document_flow`
 -- AUTO_INCREMENT for table `settings`
 --
 ALTER TABLE `settings`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `users`

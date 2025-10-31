@@ -125,27 +125,28 @@ class DocumentController extends Controller {
             }
 
         } else {
-            // --- Load Blank Form (เมื่อเข้าหน้าฟอร์มครั้งแรก) ---
+            // โหลดฟอร์มเปล่า (Logic ใหม่ที่ดึงค่าจาก Settings)
+            
+            // 1. ดึงรูปแบบการสร้างเลขทะเบียน (เช่น 'year_based' หรือ 'continuous')
+            $format = get_setting('doc_number_format', 'year_based');
 
-            // 1. ดึงเลขล่าสุดจากตาราง settings
-            $latestNumber = (int)$this->documentModel->getSettingValue('doc_registration_counter');
+            // 2. ดึงเลขล่าสุดจากตาราง settings
+            $latestNumber = (int)get_setting('doc_registration_counter', 0);
             $nextNumber = $latestNumber + 1; // เลขถัดไป
-
-            // 2. สร้างปี พ.ศ.
+            
             $buddhistYear = date("Y") + 543;
+            $registrationNumber = '';
 
-            // 3. สร้างเลขทะเบียนรับ (เช่น 123/2567)
-            // สร้างเลขทะเบียนตามที่คุณต้องการ (แบบรันต่อเนื่อง หรือแบบมีปี)
-            // แบบรันต่อเนื่อง:
-            $registrationNumber = $nextNumber; 
-            // แบบมีปี:
-            // $registrationNumber = $nextNumber . '/' . $buddhistYear;
- 
+            // 3. สร้างเลขทะเบียนตามรูปแบบที่ตั้งค่าไว้
+            if ($format == 'year_based') {
+                $registrationNumber = $nextNumber . '/' . $buddhistYear;
+            } else { // 'continuous'
+                $registrationNumber = $nextNumber;
+            }
 
-            // 4. เตรียมข้อมูลสำหรับแสดงในฟอร์ม
             $data = [
-                'registration_date' => date('Y-m-d'), // ใส่วันที่ปัจจุบันให้เลย
-                'doc_registration_number' => $registrationNumber, // ใส่เลขทะเบียนรับอัตโนมัติ
+                'registration_date' => date('Y-m-d'),
+                'doc_registration_number' => $registrationNumber,
                 'doc_incoming_number' => '',
                 'doc_date' => '',
                 'doc_from' => '',
