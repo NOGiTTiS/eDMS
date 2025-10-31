@@ -1,31 +1,34 @@
-<?php
+<?php 
+    // ดึงค่าสีทั้งหมดจาก Settings
     $themeColor = get_setting('theme_color', '#ec4899');
-    // สร้างสีที่เข้มขึ้นสำหรับ hover state
-    // (นี่เป็น Logic แบบง่ายๆ อาจต้องปรับปรุงถ้าต้องการความแม่นยำสูง)
-    function adjustBrightness($hex, $steps)
-    {
+    $bgColorStart = get_setting('bg_gradient_start', '#fbc2eb');
+    $bgColorEnd = get_setting('bg_gradient_end', '#a6c1ee');
+    
+    // Logic สร้างสี Hover (เหมือนเดิม)
+    function adjustBrightness($hex, $steps) {
         $steps = max(-255, min(255, $steps));
-        $hex   = str_replace('#', '', $hex);
+        $hex = str_replace('#', '', $hex);
         if (strlen($hex) == 3) {
-            $hex = str_repeat(substr($hex, 0, 1), 2) . str_repeat(substr($hex, 1, 1), 2) . str_repeat(substr($hex, 2, 1), 2);
+            $hex = str_repeat(substr($hex,0,1), 2).str_repeat(substr($hex,1,1), 2).str_repeat(substr($hex,2,1), 2);
         }
-        $r = hexdec(substr($hex, 0, 2));
-        $g = hexdec(substr($hex, 2, 2));
-        $b = hexdec(substr($hex, 4, 2));
-        $r = max(0, min(255, $r + $steps));
-        $g = max(0, min(255, $g + $steps));
-        $b = max(0, min(255, $b + $steps));
-        return '#' . str_pad(dechex($r), 2, '0', STR_PAD_LEFT) . str_pad(dechex($g), 2, '0', STR_PAD_LEFT) . str_pad(dechex($b), 2, '0', STR_PAD_LEFT);
+        $r = hexdec(substr($hex,0,2));
+        $g = hexdec(substr($hex,2,2));
+        $b = hexdec(substr($hex,4,2));
+        $r = max(0,min(255,$r + $steps));
+        $g = max(0,min(255,$g + $steps));
+        $b = max(0,min(255,$b + $steps));
+        return '#'.str_pad(dechex($r), 2, '0', STR_PAD_LEFT).str_pad(dechex($g), 2, '0', STR_PAD_LEFT).str_pad(dechex($b), 2, '0', STR_PAD_LEFT);
     }
-    $themeColorHover = adjustBrightness($themeColor, -20); // ทำให้สีเข้มขึ้นเล็กน้อย
+    $themeColorHover = adjustBrightness($themeColor, -20);
 ?>
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo get_setting('site_name', SITENAME); ?></title>
-    <link rel="icon" href="<?php echo URLROOT . '/' . get_setting('site_favicon'); ?>" type="image/x-icon">
+    <?php $favicon = get_setting('site_favicon'); if(!empty($favicon)): ?>
+        <link rel="icon" href="<?php echo URLROOT . '/' . $favicon; ?>" type="image/x-icon">
+    <?php endif; ?>
 
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -44,13 +47,16 @@
     <!-- Custom CSS -->
     <style>
         :root {
-            --theme-color:                                                     <?php echo $themeColor; ?>;
-            --theme-color-hover:                                                                 <?php echo $themeColorHover; ?>;
+            --theme-color: <?php echo $themeColor; ?>;
+            --theme-color-hover: <?php echo $themeColorHover; ?>;
+            /* เพิ่มตัวแปรสำหรับสีพื้นหลัง */
+            --bg-gradient-start: <?php echo $bgColorStart; ?>;
+            --bg-gradient-end: <?php echo $bgColorEnd; ?>;
         }
 
         body {
             font-family: 'Prompt', sans-serif;
-            background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
         }
         /* Glassmorphism Effect */
         .glass-effect {
@@ -71,8 +77,8 @@
         }
         .input-field:focus {
             outline: none;
-            box-shadow: 0 0 0 2px #ec4899; /* pink-500 */
-            border-color: #ec4899;
+            box-shadow: 0 0 0 2px var(--theme-color);
+            border-color: var(--theme-color);
         }
         /* ########################################## */
 

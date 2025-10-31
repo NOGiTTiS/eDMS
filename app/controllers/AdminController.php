@@ -154,6 +154,8 @@ class AdminController extends Controller {
                 'site_name' => trim($_POST['site_name']),
                 'site_copyright' => trim($_POST['site_copyright']),
                 'theme_color' => $_POST['theme_color'],
+                'bg_gradient_start' => $_POST['bg_gradient_start'],
+                'bg_gradient_end' => $_POST['bg_gradient_end'],
                 'doc_number_format' => $_POST['doc_number_format'],
                 'doc_registration_counter' => (int)$_POST['doc_registration_counter']
             ];
