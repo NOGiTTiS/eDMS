@@ -66,15 +66,31 @@ class ReportController extends Controller {
 
     // ฟังก์ชันสำหรับแสดงหน้ารายงานสรุป
     public function summary(){
-        $this->reportModel = $this->model('Report'); // เราจะสร้าง Model ใหม่
+        $this->reportModel = $this->model('Report');
         
-        // ดึงข้อมูลสรุปจาก Model
-        $avgDirectorApprovalTime = $this->reportModel->getAverageApprovalTime('forward_to_director', 'approve_by_director');
-        $avgDeputyApprovalTime = $this->reportModel->getAverageApprovalTime('forward_to_deputy', 'approve_by_deputy');
+        // --- รับค่าจากฟอร์ม ---
+        $selectedMonth = isset($_GET['month']) ? $_GET['month'] : date('n'); // เดือนปัจจุบัน
+        $selectedYearBE = isset($_GET['year']) ? (int)$_GET['year'] : date('Y') + 543; // ปี พ.ศ. ปัจจุบัน
+        $selectedYearCE = $selectedYearBE - 543; // แปลงเป็น ค.ศ. สำหรับ Query
+        
+        // --- ดึงข้อมูลสรุปจาก Model โดยส่งช่วงเวลาไปด้วย ---
+        $totalDocs = $this->reportModel->getTotalDocuments($selectedMonth, $selectedYearCE);
+        $completedDocs = $this->reportModel->getCompletedDocuments($selectedMonth, $selectedYearCE);
+        $avgDirectorTime = $this->reportModel->getAverageApprovalTime('forward_to_director', 'approve_by_director', $selectedMonth, $selectedYearCE);
+        $avgDeputyTime = $this->reportModel->getAverageApprovalTime('forward_to_deputy', 'approve_by_deputy', $selectedMonth, $selectedYearCE);
+        
+        // --- ส่วนที่ขาดหายไป: ดึงข้อมูลสำหรับกราฟ ---
+        $dailyChartData = $this->reportModel->getDailyDocumentCount($selectedMonth, $selectedYearCE);
+        // --- จบส่วนที่ขาดหายไป ---
 
         $data = [
-            'avgDirectorApprovalTime' => $this->formatDuration($avgDirectorApprovalTime),
-            'avgDeputyApprovalTime' => $this->formatDuration($avgDeputyApprovalTime)
+            'selectedMonth' => $selectedMonth,
+            'selectedYear' => $selectedYearBE,
+            'totalDocuments' => $totalDocs,
+            'completedDocuments' => $completedDocs,
+            'avgDirectorApprovalTime' => $this->formatDuration($avgDirectorTime),
+            'avgDeputyApprovalTime' => $this->formatDuration($avgDeputyTime),
+            'dailyChartData' => $dailyChartData // <-- ส่งข้อมูลกราฟไปให้ View
         ];
 
         $this->view('reports/summary', $data);
