@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # Service สำหรับ Web Server (Apache + PHP)
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: edms_web
+    ports:
+      - "8080:80" # แมพพอร์ต 8080 ของเครื่องเรา ไปยังพอร์ต 80 ของ container
+    volumes:
+      - ./:/var/www/html/ # เชื่อมโค้ดในโปรเจกต์เราเข้ากับ container
+    depends_on:
+      - db
+    networks:
+      - edms-network
+
+  # Service สำหรับ Database (MySQL)
+  db:
+    image: mysql:8.0
+    container_name: edms_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: db_edms
+      MYSQL_ROOT_PASSWORD: rootpassword # รหัสผ่านของ root (ควรเปลี่ยนใน Production)
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "33066:3306" # แมพพอร์ต 33066 ของเครื่องเรา ไปยังพอร์ต 3306 ของ container
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - edms-network
+
+  # Service สำหรับ phpMyAdmin (เครื่องมือจัดการ DB ผ่านเว็บ)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: edms_pma
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    networks:
+      - edms-network
+
+networks:
+  edms-network:
+    driver: bridge
+
+volumes:
+  db_data:
