@@ -5,6 +5,20 @@ class ReportController extends Controller {
             header('location: ' . URLROOT . '/user/login');
             exit();
         }
+
+        // --- Security Check ที่ยืดหยุ่นกว่าเดิม ---
+        // กำหนด Role ที่สามารถเข้าถึงหน้ารายงานได้
+        $allowedRoles = ['central_admin', 'director', 'deputy_director'];
+
+        // ตรวจสอบว่า Role ของผู้ใช้ปัจจุบันอยู่ในรายการที่อนุญาตหรือไม่
+        if(!in_array($_SESSION['user_role'], $allowedRoles)){
+            // ถ้าไม่อยู่ในรายการ ให้ส่งกลับไปหน้า Dashboard พร้อมข้อความแจ้งเตือน
+            flash('doc_action_fail', 'คุณไม่มีสิทธิ์เข้าถึงส่วนรายงาน', 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative');
+            header('location: '. URLROOT . '/dashboard');
+            exit();
+        }
+        // --- จบ Security Check ---
+        
         $this->documentModel = $this->model('Document');
     }
 
