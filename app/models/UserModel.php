@@ -127,5 +127,30 @@ class UserModel extends Model {
             return false;
         }
     }
+
+    // ฟังก์ชันใหม่: สำหรับอัปเดตข้อมูลโปรไฟล์โดยผู้ใช้เอง
+    public function updateProfile($data){
+        // ตรวจสอบว่า username ที่แก้ไขใหม่ ซ้ำกับคนอื่นหรือไม่ (ยกเว้นตัวเอง)
+        $this->db->query("SELECT id FROM users WHERE username = :username AND id != :id");
+        $this->db->bind(':username', $data['username']);
+        $this->db->bind(':id', $data['id']);
+        $this->db->single();
+        if($this->db->rowCount() > 0){
+            return 'username_exists'; // คืนค่า error message
+        }
+
+        // ถ้าไม่ซ้ำ ก็ทำการอัปเดต
+        $this->db->query('UPDATE users SET full_name = :full_name, username = :username, telegram_chat_id = :telegram_chat_id WHERE id = :id');
+        $this->db->bind(':id', $data['id']);
+        $this->db->bind(':full_name', $data['full_name']);
+        $this->db->bind(':username', $data['username']);
+        $this->db->bind(':telegram_chat_id', $data['telegram_chat_id']);
+
+        if($this->db->execute()){
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 ?>

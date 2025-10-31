@@ -49,5 +49,48 @@ class ProfileController extends Controller {
             exit();
         }
     }
+
+    // ฟังก์ชันใหม่: สำหรับอัปเดตข้อมูลโปรไฟล์
+    public function updateProfile(){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            $data = [
+                'id' => $_SESSION['user_id'],
+                'full_name' => trim($_POST['full_name']),
+                'username' => trim($_POST['username']),
+                'telegram_chat_id' => trim($_POST['telegram_chat_id']),
+                'full_name_err' => '',
+                'username_err' => ''
+            ];
+
+            // Validation
+            if(empty($data['full_name'])) $data['full_name_err'] = 'กรุณากรอกชื่อ-สกุล';
+            if(empty($data['username'])) $data['username_err'] = 'กรุณากรอก Username';
+
+            if(empty($data['full_name_err']) && empty($data['username_err'])){
+                $updateResult = $this->userModel->updateProfile($data);
+
+                if($updateResult === true){
+                    // อัปเดต Session ให้เป็นข้อมูลใหม่ทันที
+                    $_SESSION['user_full_name'] = $data['full_name'];
+                    $_SESSION['user_username'] = $data['username'];
+
+                    flash('profile_action_success', 'อัปเดตข้อมูลโปรไฟล์เรียบร้อยแล้ว');
+                    header('location: ' . URLROOT . '/profile');
+                    exit();
+                } else if ($updateResult === 'username_exists'){
+                    $data['username_err'] = 'Username นี้ถูกใช้งานแล้ว';
+                    $this->view('profile/index', $data); // โหลดหน้าเดิมพร้อม Error
+                } else {
+                    die('Something went wrong');
+                }
+            } else {
+                $this->view('profile/index', $data); // โหลดหน้าเดิมพร้อม Error
+            }
+        } else {
+            header('location: ' . URLROOT . '/profile');
+            exit();
+        }
+    }
 }
 ?>
