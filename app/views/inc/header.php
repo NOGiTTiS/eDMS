@@ -111,6 +111,8 @@
                                 <div class="border-t my-1"></div>
                                 <a href="<?php echo URLROOT; ?>/admin" class="block px-4 py-2 text-sm text-purple-600 hover:bg-pink-100 font-semibold">จัดการผู้ใช้</a>
                                 <a href="<?php echo URLROOT; ?>/admin/settings" class="block px-4 py-2 text-sm text-purple-600 hover:bg-pink-100 font-semibold">ตั้งค่าระบบ</a>
+                                <div class="border-t my-1"></div>
+                                <a href="<?php echo URLROOT; ?>/report/summary" class="block px-4 py-2 text-sm text-green-600 hover:bg-pink-100 font-semibold">รายงานสรุป</a>
                             <?php endif; ?>
 
                             <div class="border-t my-1"></div>

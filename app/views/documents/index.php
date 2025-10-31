@@ -3,12 +3,19 @@
 <div class="p-8 rounded-lg glass-effect">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-800">ทะเบียนหนังสือรับ</h1>
-
-        <?php if ($_SESSION['user_role'] == 'central_admin'): ?>
-            <a href="<?php echo URLROOT; ?>/document/add" class="bg-[var(--theme-color)] text-white font-bold py-2 px-4 rounded-full hover:bg-[var(--theme-color-hover)] transition duration-300">
-                ลงรับหนังสือใหม่
+        <div class="flex items-center space-x-2">
+            <!-- ===== เพิ่มปุ่ม Export ===== -->
+            <a href="<?php echo URLROOT; ?>/report/exportRegister?search=<?php echo urlencode($data['searchTerm']); ?>" 
+               class="bg-green-500 text-white font-bold py-2 px-4 rounded-full hover:bg-green-600 transition-colors">
+                Export to Excel
             </a>
-        <?php endif; ?>
+
+            <?php if ($_SESSION['user_role'] == 'central_admin'): ?>
+                <a href="<?php echo URLROOT; ?>/document/add" class="bg-[var(--theme-color)] text-white font-bold py-2 px-4 rounded-full hover:bg-[var(--theme-color-hover)] transition duration-300">
+                    ลงรับหนังสือใหม่
+                </a>
+            <?php endif; ?>
+        </div>
     </div>
 
     <?php flash('doc_action_success'); ?>
