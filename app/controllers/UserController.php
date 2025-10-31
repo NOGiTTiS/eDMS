@@ -87,6 +87,7 @@ class UserController extends Controller {
     }
 
     public function login(){
+        // ตรวจสอบว่าเป็น POST request หรือไม่
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
             
@@ -97,39 +98,40 @@ class UserController extends Controller {
                 'password_err' => '',
             ];
 
-            if(empty($data['username'])){
-                $data['username_err'] = 'กรุณากรอกชื่อผู้ใช้';
-            }
-            if(empty($data['password'])){
-                $data['password_err'] = 'กรุณากรอกรหัสผ่าน';
-            }
+            // --- ตรรกะการตรวจสอบที่ถูกต้อง ---
 
-            // ตรวจสอบ username
-            if($this->userModel->findUserByUsername($data['username'])){
-                // User found
-            } else {
-                $data['username_err'] = 'ไม่พบชื่อผู้ใช้นี้ในระบบ';
-            }
+            // 1. Validate Input
+            if(empty($data['username'])) $data['username_err'] = 'กรุณากรอกชื่อผู้ใช้';
+            if(empty($data['password'])) $data['password_err'] = 'กรุณากรอกรหัสผ่าน';
             
+            // ถ้า Input ไม่ว่างเปล่า ถึงจะเริ่มตรวจสอบกับฐานข้อมูล
             if(empty($data['username_err']) && empty($data['password_err'])){
-                // Validated
-                $loggedInUser = $this->userModel->findUserByUsername($data['username']);
-                if($loggedInUser && password_verify($data['password'], $loggedInUser->password)){
-                    // Log Login Success
-                    log_activity('LOGIN_SUCCESS', 'User logged in successfully.', $loggedInUser->id, $loggedInUser->username);
-                    // Create Session
-                    $this->createUserSession($loggedInUser);
+                // 2. ค้นหาผู้ใช้ด้วย Username
+                if($loggedInUser = $this->userModel->findUserByUsername($data['username'])){
+                    // ถ้าเจอผู้ใช้ -> 3. ตรวจสอบรหัสผ่าน
+                    if(password_verify($data['password'], $loggedInUser->password)){
+                        // รหัสผ่านถูกต้อง -> Login สำเร็จ
+                        log_activity('LOGIN_SUCCESS', 'User logged in successfully.', $loggedInUser->id, $loggedInUser->username);
+                        $this->createUserSession($loggedInUser);
+                    } else {
+                        // รหัสผ่านผิด
+                        log_activity('LOGIN_FAILED', 'Failed login attempt with incorrect password.', null, $data['username']);
+                        $data['password_err'] = 'รหัสผ่านไม่ถูกต้อง';
+                        $this->view('user/login', $data);
+                    }
                 } else {
-                    // Log Login Failed
-                    log_activity('LOGIN_FAILED', 'Failed login attempt with password.', null, $data['username']);
-                    $data['password_err'] = 'รหัสผ่านไม่ถูกต้อง';
+                    // ถ้าไม่เจอผู้ใช้
+                    log_activity('LOGIN_FAILED', 'Failed login attempt with non-existent username.', null, $data['username']);
+                    $data['username_err'] = 'ไม่พบชื่อผู้ใช้นี้ในระบบ';
                     $this->view('user/login', $data);
                 }
             } else {
+                // ถ้า Input ว่างเปล่า ก็แค่โหลดหน้าจอพร้อม Error
                 $this->view('user/login', $data);
             }
 
         } else {
+            // ถ้าเป็น GET request (เข้ามาดูหน้าฟอร์มปกติ)
             $data = [
                 'username' => '',
                 'password' => '',
@@ -137,12 +139,6 @@ class UserController extends Controller {
                 'password_err' => '',
             ];
             $this->view('user/login', $data);
-        }
-
-        // ในส่วนที่หา Username ไม่เจอ
-        if(!$this->userModel->findUserByUsername($data['username'])){
-            log_activity('LOGIN_FAILED', 'Failed login attempt with non-existent username.', null, $data['username']);
-            $data['username_err'] = 'ไม่พบชื่อผู้ใช้นี้ในระบบ';
         }
     }
 

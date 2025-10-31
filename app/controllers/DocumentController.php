@@ -24,16 +24,30 @@ class DocumentController extends Controller {
         $userId = $_SESSION['user_id'];
         
         $totalRecords = 0;
+        $documents = [];
         
+        // --- ส่วนที่แก้ไขให้สมบูรณ์ ---
         if($userRole == 'director'){
             $totalRecords = $this->documentModel->countDocumentsForUser($userId, $searchTerm);
             $documents = $this->documentModel->getDocumentsForUser($userId, $searchTerm, $recordsPerPage, $offset);
         } 
-        // ... (เพิ่ม else if สำหรับ Role อื่นๆ ในทำนองเดียวกัน) ...
+        elseif($userRole == 'dept_admin') {
+            $totalRecords = $this->documentModel->countDocumentsForDeptAdmin($userId, $searchTerm);
+            $documents = $this->documentModel->getDocumentsForDeptAdmin($userId, $searchTerm, $recordsPerPage, $offset);
+        }
+        elseif($userRole == 'deputy_director') {
+            $totalRecords = $this->documentModel->countDocumentsForDeputy($userId, $searchTerm);
+            $documents = $this->documentModel->getDocumentsForDeputy($userId, $searchTerm, $recordsPerPage, $offset);
+        }
+        elseif($userRole == 'section_head') {
+            $totalRecords = $this->documentModel->countDocumentsForSectionHead($userId, $searchTerm);
+            $documents = $this->documentModel->getDocumentsForSectionHead($userId, $searchTerm, $recordsPerPage, $offset);
+        }
         else { // central_admin
             $totalRecords = $this->documentModel->countAllDocuments($searchTerm);
             $documents = $this->documentModel->getDocuments($searchTerm, $recordsPerPage, $offset);
         }
+        // --- จบส่วนที่แก้ไข ---
         
         $totalPages = ceil($totalRecords / $recordsPerPage);
 
@@ -421,7 +435,7 @@ class DocumentController extends Controller {
     public function approveDeputy($id){
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
             
-            // --- ส่วนจัดการลายเซ็น (ถูกต้องแล้ว) ---
+            // --- ส่วนจัดการลายเซ็น (เหมือนเดิม) ---
             $signatureImage = $_POST['signature']; 
             $signatureImage = str_replace('data:image/png;base64,', '', $signatureImage);
             $signatureImage = str_replace(' ', '+', $signatureImage);
@@ -441,13 +455,30 @@ class DocumentController extends Controller {
                 'comment' => trim($_POST['comment']),
                 'signature_path' => $filePath,
                 'user_id' => $_SESSION['user_id']
-                // ไม่มี forward_to_id
             ];
 
-            // เรียกใช้ฟังก์ชัน approveByDeputy (ที่ไม่มีการส่งต่อ)
             if($this->documentModel->approveByDeputy($data)){
-                // TODO: แจ้งเตือนกลับหาธุรการฝ่าย
                 
+                // --- เพิ่มส่วนแจ้งเตือนกลับหา "ธุรการฝ่าย" ที่ขาดหายไป ---
+                $this->userModel = $this->model('User');
+                // ใช้ฟังก์ชันที่เราเคยสร้างไว้ เพื่อหาว่าใครคือคนส่งเรื่องมาให้เรา
+                $senderId = $this->documentModel->findUserWhoForwardedTo($id, $_SESSION['user_id']);
+                
+                if($senderId){
+                    $document = $this->documentModel->getDocumentById($id);
+                    $deptAdmin = $this->userModel->getUserById($senderId);
+
+                    if($deptAdmin && !empty($deptAdmin->telegram_chat_id)){
+                        $message = "<b>เอกสารได้รับการเกษียณแล้ว (โดย รองฯ)</b>\n\n";
+                        $message .= "<b>เรื่อง:</b> " . htmlspecialchars($document->doc_subject) . "\n";
+                        $message .= "<b>โดย:</b> " . htmlspecialchars($_SESSION['user_full_name']) . "\n";
+                        $message .= "<b>สถานะใหม่:</b> " . translateStatus('pending_dept_admin_action') . "\n\n"; // ใช้ Helper แปลสถานะ
+                        $message .= "กรุณาตรวจสอบเพื่อดำเนินการต่อที่: " . URLROOT . "/document/show/" . $id;
+                        sendTelegramMessage($deptAdmin->telegram_chat_id, $message);
+                    }
+                }
+                // --- จบส่วนแจ้งเตือน ---
+
                 flash('doc_action_success', 'เกษียณหนังสือเรียบร้อยแล้ว');
                 header('location: ' . URLROOT . '/document/show/' . $id);
                 exit();
@@ -632,6 +663,32 @@ class DocumentController extends Controller {
             header('location: ' . URLROOT . '/document');
             exit();
         }
+    }
+
+    public function getDepartmentById($id){
+        $this->db->query("SELECT * FROM departments WHERE id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->single();
+    }
+
+    public function addDepartment($name){
+        $this->db->query("INSERT INTO departments (name) VALUES (:name)");
+        $this->db->bind(':name', $name);
+        return $this->db->execute();
+    }
+
+    public function updateDepartment($id, $name){
+        $this->db->query("UPDATE departments SET name = :name WHERE id = :id");
+        $this->db->bind(':id', $id);
+        $this->db->bind(':name', $name);
+        return $this->db->execute();
+    }
+
+    public function deleteDepartment($id){
+        // TODO: ควรมีการตรวจสอบก่อนว่ามีผู้ใช้ผูกกับฝ่ายนี้หรือไม่
+        $this->db->query("DELETE FROM departments WHERE id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
     }
 }
 ?>

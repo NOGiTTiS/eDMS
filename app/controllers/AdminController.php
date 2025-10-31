@@ -201,5 +201,63 @@ class AdminController extends Controller {
         $data = ['logs' => $logs];
         $this->view('admin/logs', $data);
     }
+
+    // ========== DEPARTMENT MANAGEMENT ==========
+
+    public function departments(){
+        $departments = $this->documentModel->getDepartments();
+        $data = ['departments' => $departments];
+        $this->view('admin/departments/index', $data);
+    }
+
+    public function addDepartment(){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $name = trim($_POST['name']);
+            if(!empty($name)){
+                if($this->documentModel->addDepartment($name)){
+                    flash('dept_action_success', 'เพิ่มฝ่ายใหม่เรียบร้อยแล้ว');
+                    header('location: ' . URLROOT . '/admin/departments');
+                    exit();
+                }
+            }
+        }
+        // ถ้าไม่สำเร็จหรือเป็น GET request ก็กลับไปหน้าหลัก
+        header('location: ' . URLROOT . '/admin/departments');
+        exit();
+    }
+    
+    public function editDepartment($id){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $name = trim($_POST['name']);
+            if(!empty($name)){
+                if($this->documentModel->updateDepartment($id, $name)){
+                    flash('dept_action_success', 'แก้ไขชื่อฝ่ายเรียบร้อยแล้ว');
+                    header('location: ' . URLROOT . '/admin/departments');
+                    exit();
+                }
+            }
+        }
+        // ถ้าไม่สำเร็จหรือเป็น GET request ให้ไปหน้าฟอร์มแก้ไข
+        $department = $this->documentModel->getDepartmentById($id);
+        if(!$department){
+             header('location: ' . URLROOT . '/admin/departments');
+             exit();
+        }
+        $data = ['department' => $department];
+        $this->view('admin/departments/edit', $data);
+    }
+    
+    public function deleteDepartment($id){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            // TODO: Add check if department is in use
+            if($this->documentModel->deleteDepartment($id)){
+                flash('dept_action_success', 'ลบฝ่ายเรียบร้อยแล้ว');
+            } else {
+                flash('dept_action_fail', 'ไม่สามารถลบฝ่ายได้ อาจมีผู้ใช้งานอยู่ในฝ่ายนี้', 'bg-red-100 ...');
+            }
+        }
+        header('location: ' . URLROOT . '/admin/departments');
+        exit();
+    }
 }
 ?>

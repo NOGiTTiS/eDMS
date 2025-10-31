@@ -502,5 +502,42 @@ class DocumentModel extends Model {
         $this->db->bind(':key', $key);
         return $this->db->execute();
     }
+
+    // ========== DEPARTMENT MANAGEMENT METHODS ==========
+
+    public function getDepartmentById($id){
+        $this->db->query("SELECT * FROM departments WHERE id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->single();
+    }
+
+    public function addDepartment($name){
+        $this->db->query("INSERT INTO departments (name) VALUES (:name)");
+        $this->db->bind(':name', $name);
+        return $this->db->execute();
+    }
+
+    public function updateDepartment($id, $name){
+        $this->db->query("UPDATE departments SET name = :name WHERE id = :id");
+        $this->db->bind(':id', $id);
+        $this->db->bind(':name', $name);
+        return $this->db->execute();
+    }
+
+    public function deleteDepartment($id){
+        // ตรวจสอบก่อนว่ามีผู้ใช้ผูกกับฝ่ายนี้หรือไม่
+        $this->db->query("SELECT COUNT(id) as user_count FROM users WHERE department_id = :id");
+        $this->db->bind(':id', $id);
+        $result = $this->db->single();
+
+        if ($result && $result->user_count > 0) {
+            return false; // ไม่สามารถลบได้ เพราะมีผู้ใช้สังกัดอยู่
+        }
+
+        // ถ้าไม่มีผู้ใช้สังกัดอยู่ ก็ทำการลบ
+        $this->db->query("DELETE FROM departments WHERE id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
 }
 ?>
