@@ -111,7 +111,8 @@ class DocumentController extends Controller {
 
             // 5. ถ้าข้อมูลถูกต้องทั้งหมด ให้ทำการบันทึก
             if(empty($data['doc_subject_err'])){
-                if($this->documentModel->addDocument($data)){
+                if($newDocId = $this->documentModel->addDocument($data)){
+                    log_activity('CREATE_DOCUMENT', 'Created document ID: ' . $newDocId . ' with number ' . $data['doc_registration_number']);
                     // ถ้าบันทึกสำเร็จ สร้าง flash message แล้ว redirect ไปหน้าแรก
                     flash('doc_add_success', 'ลงรับหนังสือเรียบร้อยแล้ว');
                     header('location: ' . URLROOT . '/document');
@@ -582,6 +583,7 @@ class DocumentController extends Controller {
 
             if(empty($data['doc_subject_err'])){
                 if($this->documentModel->updateDocument($data)){
+                    log_activity('UPDATE_DOCUMENT', 'Updated document ID: ' . $id);
                     flash('doc_action_success', 'แก้ไขข้อมูลเอกสารเรียบร้อยแล้ว');
                     header('location: ' . URLROOT . '/document/show/' . $id);
                     exit();
@@ -621,6 +623,7 @@ class DocumentController extends Controller {
             }
 
             if($this->documentModel->deleteDocument($id)){
+                log_activity('DELETE_DOCUMENT', 'Deleted document ID: ' . $id);
                 flash('doc_action_success', 'ลบเอกสารเรียบร้อยแล้ว');
                 header('location: ' . URLROOT . '/document');
                 exit();

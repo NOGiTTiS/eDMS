@@ -11,6 +11,7 @@ require_once '../app/helpers/status_helper.php';
 require_once '../app/helpers/telegram_helper.php';
 require_once '../app/helpers/role_helper.php';
 require_once '../app/helpers/settings_helper.php';
+require_once '../app/helpers/log_helper.php';
 
 // เรียกไฟล์ Core ทั้งหมด
 require_once '../app/core/Database.php';

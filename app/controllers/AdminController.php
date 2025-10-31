@@ -49,6 +49,7 @@ class AdminController extends Controller {
             if(empty($data['full_name_err']) && empty($data['username_err']) && empty($data['password_err'])){
                 $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
                 if($this->userModel->addUserByAdmin($data)){
+                    log_activity('ADMIN_CREATE_USER', 'Admin created a new user: ' . $data['username']);
                     flash('user_action_success', 'เพิ่มผู้ใช้ใหม่เรียบร้อยแล้ว');
                     header('location: ' . URLROOT . '/admin');
                     exit();
@@ -95,6 +96,7 @@ class AdminController extends Controller {
                     $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
                 }
                 if($this->userModel->updateUser($data)){
+                    log_activity('ADMIN_UPDATE_USER', 'Admin updated user profile: ' . $data['username']);
                     flash('user_action_success', 'อัปเดตข้อมูลผู้ใช้เรียบร้อยแล้ว');
                     header('location: ' . URLROOT . '/admin');
                     exit();
@@ -130,6 +132,7 @@ class AdminController extends Controller {
     public function deleteUser($id){
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
             if($this->userModel->deleteUser($id)){
+                log_activity('ADMIN_DELETE_USER', 'Admin deleted user ID: ' . $id);
                 flash('user_action_success', 'ลบผู้ใช้เรียบร้อยแล้ว');
                 header('location: ' . URLROOT . '/admin');
                 exit();
@@ -187,6 +190,14 @@ class AdminController extends Controller {
             $data = ['settings' => $settings];
             $this->view('admin/settings', $data);
         }
+    }
+
+    // เมธอดใหม่: หน้าแสดง Log
+    public function logs(){
+        $this->logModel = $this->model('Log'); // เราจะสร้าง Model ใหม่
+        $logs = $this->logModel->getAllLogs();
+        $data = ['logs' => $logs];
+        $this->view('admin/logs', $data);
     }
 }
 ?>

@@ -115,9 +115,13 @@ class UserController extends Controller {
                 // Validated
                 $loggedInUser = $this->userModel->findUserByUsername($data['username']);
                 if($loggedInUser && password_verify($data['password'], $loggedInUser->password)){
+                    // Log Login Success
+                    log_activity('LOGIN_SUCCESS', 'User logged in successfully.', $loggedInUser->id, $loggedInUser->username);
                     // Create Session
                     $this->createUserSession($loggedInUser);
                 } else {
+                    // Log Login Failed
+                    log_activity('LOGIN_FAILED', 'Failed login attempt with password.', null, $data['username']);
                     $data['password_err'] = 'รหัสผ่านไม่ถูกต้อง';
                     $this->view('user/login', $data);
                 }
@@ -133,6 +137,12 @@ class UserController extends Controller {
                 'password_err' => '',
             ];
             $this->view('user/login', $data);
+        }
+
+        // ในส่วนที่หา Username ไม่เจอ
+        if(!$this->userModel->findUserByUsername($data['username'])){
+            log_activity('LOGIN_FAILED', 'Failed login attempt with non-existent username.', null, $data['username']);
+            $data['username_err'] = 'ไม่พบชื่อผู้ใช้นี้ในระบบ';
         }
     }
 
@@ -161,6 +171,7 @@ class UserController extends Controller {
     }
 
     public function logout(){
+        log_activity('LOGOUT', 'User logged out.');
         unset($_SESSION['user_id']);
         unset($_SESSION['user_username']);
         unset($_SESSION['user_full_name']);
