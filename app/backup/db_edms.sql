@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db:3306
--- Generation Time: Oct 31, 2025 at 08:31 AM
+-- Generation Time: Oct 31, 2025 at 08:44 AM
 -- Server version: 8.0.44
 -- PHP Version: 8.3.26
 
@@ -110,7 +110,8 @@ INSERT INTO `settings` (`id`, `setting_key`, `setting_value`) VALUES
 (5, 'theme_color', '#fe86f4'),
 (6, 'doc_number_format', 'continuous'),
 (30, 'bg_gradient_start', '#fbc2eb'),
-(31, 'bg_gradient_end', '#a6c1ee');
+(31, 'bg_gradient_end', '#a6c1ee'),
+(36, 'site_copyright', '© 2025 S6N. All Rights Reserved.');
 
 -- --------------------------------------------------------
 
@@ -208,7 +209,7 @@ ALTER TABLE `document_flow`
 -- AUTO_INCREMENT for table `settings`
 --
 ALTER TABLE `settings`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `users`

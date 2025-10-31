@@ -13,6 +13,10 @@
                     <input type="text" name="site_name" class="mt-1 block w-full input-field" value="<?php echo htmlspecialchars($data['settings']['site_name']); ?>">
                 </div>
                 <div>
+                    <label for="site_copyright" class="block text-sm font-medium text-gray-700">ข้อความลิขสิทธิ์ (Copyright)</label>
+                    <input type="text" name="site_copyright" class="mt-1 block w-full input-field" value="<?php echo htmlspecialchars($data['settings']['site_copyright']); ?>">
+                </div>
+                <div>
                     <label for="theme_color" class="block text-sm font-medium text-gray-700">สีธีมหลัก</label>
                     <input type="color" name="theme_color" class="mt-1 h-10 w-full input-field" value="<?php echo htmlspecialchars($data['settings']['theme_color']); ?>">
                 </div>

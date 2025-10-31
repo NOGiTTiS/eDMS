@@ -149,6 +149,7 @@ class AdminController extends Controller {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
             $settingsToUpdate = [
                 'site_name' => trim($_POST['site_name']),
+                'site_copyright' => trim($_POST['site_copyright']),
                 'theme_color' => $_POST['theme_color'],
                 'doc_number_format' => $_POST['doc_number_format'],
                 'doc_registration_counter' => (int)$_POST['doc_registration_counter']
