@@ -1,21 +1,22 @@
 <?php require APPROOT . '/views/inc/header.php'; ?>
 
 <div class="flex justify-between items-center mb-6">
+    <!-- ปุ่มกลับ -->
     <a href="<?php echo URLROOT; ?>/document" class="text-blue-600 hover:text-blue-800"><i class="fas fa-chevron-left"></i> กลับไปหน้ารายการ</a>
+
+    <!-- ===== เพิ่มส่วนปุ่ม Action (แก้ไข/ลบ) ===== -->
+    <?php if(isset($data['document']) && $data['document']->created_by_id == $_SESSION['user_id'] && $data['document']->status == 'received'): ?>
+    <div class="flex items-center space-x-4">
+        <a href="<?php echo URLROOT; ?>/document/edit/<?php echo $data['document']->id; ?>" class="bg-yellow-500 text-white font-bold py-2 px-4 rounded-full hover:bg-yellow-600 transition-colors">แก้ไขเอกสาร</a>
+        <form action="<?php echo URLROOT; ?>/document/delete/<?php echo $data['document']->id; ?>" method="post" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบเอกสารนี้? การกระทำนี้ไม่สามารถย้อนกลับได้');">
+            <button type="submit" class="bg-red-500 text-white font-bold py-2 px-4 rounded-full hover:bg-red-600 transition-colors">ลบเอกสาร</button>
+        </form>
+    </div>
+    <?php endif; ?>
+    <!-- ===== จบส่วนปุ่ม Action ===== -->
 </div>
 
 <?php flash('doc_action_success'); ?>
-
-<!-- ===== เพิ่มส่วนปุ่ม Action (แก้ไข/ลบ) ===== -->
-<?php if ($data['document']->created_by_id == $_SESSION['user_id'] && $data['document']->status == 'received'): ?>
-<div class="mb-4 flex items-center space-x-4">
-    <a href="<?php echo URLROOT; ?>/document/edit/<?php echo $data['document']->id; ?>" class="bg-yellow-500 text-white font-bold py-2 px-4 rounded-full hover:bg-yellow-600">แก้ไขเอกสาร</a>
-    <form action="<?php echo URLROOT; ?>/document/delete/<?php echo $data['document']->id; ?>" method="post" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบเอกสารนี้? การกระทำนี้ไม่สามารถย้อนกลับได้');">
-        <button type="submit" class="bg-red-500 text-white font-bold py-2 px-4 rounded-full hover:bg-red-600">ลบเอกสาร</button>
-    </form>
-</div>
-<?php endif; ?>
-<!-- ===== จบส่วนปุ่ม Action ===== -->
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <!-- คอลัมน์ซ้าย: ข้อมูลหลักและไฟล์แนบ -->

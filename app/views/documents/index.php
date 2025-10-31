@@ -71,14 +71,6 @@
                                class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold hover:bg-blue-600 transition-colors">
                                 ดู
                             </a>
-
-                            <!-- ปุ่ม "แก้ไข" (จะแสดงเมื่อตรงตามเงื่อนไข) -->
-                            <?php if ($doc->created_by_id == $_SESSION['user_id'] && $doc->status == 'received'): ?>
-                                <a href="<?php echo URLROOT; ?>/document/edit/<?php echo $doc->documentId; ?>"
-                                   class="bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-semibold hover:bg-yellow-600 transition-colors">
-                                    แก้ไข
-                                </a>
-                            <?php endif; ?>
                         </div>
                     </td>
                 </tr>
