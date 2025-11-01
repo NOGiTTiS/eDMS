@@ -1,0 +1,10 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+
+    # บอกให้รู้ว่า Base Path ของเราคือ /edms
+    RewriteBase /edms/
+
+    # กฎการ Rewrite ไปยัง public
+    RewriteRule ^$ public/ [L]
+    RewriteRule (.*) public/$1 [L]
+</IfModule>
