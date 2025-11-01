@@ -60,6 +60,15 @@
                 </div>
             </div>
 
+            <!-- Telegram Settings -->
+            <h2 class="text-xl font-semibold text-gray-700 border-b pb-2 mt-8 mb-4">ตั้งค่าเอกสาร</h2>
+            <div class="space-y-4">
+                <div>
+                    <label for="telegram_bot_username" class="block text-sm font-medium text-gray-700">Telegram Bot Username</label>
+                    <input type="text" name="telegram_bot_username" class="mt-1 block w-full input-field" value="<?php echo htmlspecialchars($data['settings']['telegram_bot_username']); ?>">
+                </div>                
+            </div>
+
             <div class="mt-8 flex justify-end">
                 <button type="submit" class="bg-[var(--theme-color)] text-white font-bold py-2 px-4 rounded-full hover:bg-[var(--theme-color-hover)]">บันทึกการตั้งค่า</button>
             </div>

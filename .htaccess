@@ -7,4 +7,17 @@
     # กฎการ Rewrite ไปยัง public
     RewriteRule ^$ public/ [L]
     RewriteRule (.*) public/$1 [L]
+
+    
+
+    # Deployment .htaccess file for Edms
+    # Options -Indexes
+    # RewriteEngine On
+
+    # # บอกให้รู้ว่า Base Path ของเราคือ /edms (ใช่ครับ ใส่เหมือนกัน)
+    # RewriteBase /edms/
+
+    # RewriteCond %{REQUEST_FILENAME} !-f
+    # RewriteCond %{REQUEST_FILENAME} !-d
+    # RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
 </IfModule>

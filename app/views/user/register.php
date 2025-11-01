@@ -42,9 +42,12 @@
                     <span class="text-red-500 text-sm"><?php echo $data['department_id_err']; ?></span>
                 </div>
 
-                <!-- ===== เพิ่ม Input สำหรับ Telegram ===== -->
+                <!-- ===== ส่วน Telegram Chat ID (ฉบับแก้ไข) ===== -->
                 <div class="mt-4">
-                    <label for="telegram_chat_id" class="block text-sm font-medium text-gray-700">Telegram Chat ID (ถ้ามี)</label>
+                    <div class="flex justify-between items-center">
+                        <label for="telegram_chat_id" class="block text-sm font-medium text-gray-700">Telegram Chat ID (ถ้ามี)</label>
+                        <button type="button" id="find-chat-id-btn" class="text-xs text-blue-600 hover:underline">หา Chat ID ของฉัน</button>
+                    </div>
                     <input type="text" name="telegram_chat_id" id="telegram_chat_id" class="mt-1 block w-full input-field" value="<?php echo $data['telegram_chat_id']; ?>">
                 </div>
                 
@@ -67,4 +70,73 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const findChatIdBtn = document.getElementById('find-chat-id-btn');
+    if (findChatIdBtn) {
+        const telegramChatIdInput = document.getElementById('telegram_chat_id');
+        // ดึงค่า bot username และทำความสะอาด (trim)
+        const botUsername = "<?php echo trim(get_setting('telegram_bot_username', '')); ?>";
+
+        findChatIdBtn.addEventListener('click', function() {
+            // ตรวจสอบก่อนว่ามี bot username หรือไม่
+            if (!botUsername) {
+                Swal.fire({
+                    title: 'ข้อผิดพลาด',
+                    text: 'ยังไม่ได้ตั้งค่า Telegram Bot Username ในระบบ',
+                    icon: 'error'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'วิธีหา Telegram Chat ID',
+                html: `
+                    <div class="text-left">
+                        <p class="mb-2">1. คลิกปุ่มด้านล่างเพื่อเปิดแชทกับบอทของเรา แล้วกด <b>"Start"</b> หรือส่งข้อความอะไรก็ได้ 1 ข้อความ</p>
+                        <a href="https://t.me/${botUsername}" target="_blank" class="inline-block bg-blue-500 text-white font-bold py-2 px-4 rounded-full hover:bg-blue-600 mb-4">เปิดแชทกับ @${botUsername}</a>
+                        <p class="mb-2">2. กลับมาที่หน้านี้ แล้วคลิกปุ่ม <b>"ดึง Chat ID ล่าสุด"</b></p>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'ดึง Chat ID ล่าสุด',
+                cancelButtonText: 'ปิด',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return fetch('<?php echo URLROOT; ?>/user/getLatestChatId')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(response.statusText);
+                            }
+                            return response.json();
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(`Request failed: ${error}`);
+                        });
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (result.value.success) {
+                        telegramChatIdInput.value = result.value.chat_id;
+                        Swal.fire({
+                            title: 'สำเร็จ!',
+                            text: 'Chat ID ของคุณถูกนำมาใส่ในฟอร์มแล้ว',
+                            icon: 'success'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'ไม่สำเร็จ',
+                            text: result.value.message || 'ไม่พบข้อความล่าสุด กรุณาลองส่งข้อความหาบอทอีกครั้ง',
+                            icon: 'error'
+                        });
+                    }
+                }
+            });
+        });
+    }
+});
+</script>
+
 <?php require APPROOT . '/views/inc/footer.php'; ?>

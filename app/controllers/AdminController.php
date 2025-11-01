@@ -157,7 +157,8 @@ class AdminController extends Controller {
                 'bg_gradient_start' => $_POST['bg_gradient_start'],
                 'bg_gradient_end' => $_POST['bg_gradient_end'],
                 'doc_number_format' => $_POST['doc_number_format'],
-                'doc_registration_counter' => (int)$_POST['doc_registration_counter']
+                'doc_registration_counter' => (int)$_POST['doc_registration_counter'],
+                'telegram_bot_username' => trim($_POST['telegram_bot_username'])
             ];
 
             // --- จัดการการอัปโหลดไฟล์ ---

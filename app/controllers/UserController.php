@@ -166,5 +166,38 @@ class UserController extends Controller {
         session_destroy();
         header('location: ' . URLROOT . '/user/login');
     }
+
+    // ฟังก์ชันใหม่: สำหรับดึง Chat ID ล่าสุดที่ส่งข้อความหาบอท
+    public function getLatestChatId(){
+        // ตั้งค่าให้ Response เป็น JSON
+        header('Content-Type: application/json');
+
+        $token = get_setting('telegram_bot_token', TELEGRAM_BOT_TOKEN); // ดึง Token จาก Settings
+        if (empty($token) || $token == 'YOUR_TELEGRAM_BOT_TOKEN') {
+            echo json_encode(['success' => false, 'message' => 'Telegram Bot not configured.']);
+            exit();
+        }
+
+        // ใช้ API getUpdates เพื่อดึงข้อความล่าสุด
+        $url = "https://api.telegram.org/bot{$token}/getUpdates?limit=1&offset=-1";
+        
+        // ใช้ cURL เพื่อความเสถียร (ดีกว่า file_get_contents)
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $data = json_decode($response, true);
+
+        if ($data && $data['ok'] && !empty($data['result'])) {
+            // ดึง Chat ID จากข้อความล่าสุด
+            $chatId = $data['result'][0]['message']['chat']['id'];
+            echo json_encode(['success' => true, 'chat_id' => $chatId]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'No recent messages found. Please send a message to the bot first.']);
+        }
+        exit();
+    }
 }
 ?>
