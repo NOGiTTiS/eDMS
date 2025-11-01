@@ -39,33 +39,46 @@
 
             <!-- ส่วนไฟล์แนบ -->
             <!-- ########## เพิ่มโค้ดส่วนนี้เข้ามาใหม่ทั้งหมด ########## -->
-            <?php if (! empty($data['files'])): ?>
-                <div class="mt-6 p-6 rounded-lg glass-effect">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">เอกสารแนบ</h2>
-                    <?php foreach ($data['files'] as $file): ?>
+            <?php if(!empty($data['files'])): ?>
+                <?php foreach($data['files'] as $file): ?>
+                    <div class="mt-6 p-6 rounded-lg glass-effect">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold text-gray-800">เอกสารแนบ: <?php echo htmlspecialchars($file->original_file_name); ?></h2>
+                            <!-- ===== ปุ่มดาวน์โหลด ===== -->
+                            <a href="<?php echo URLROOT . '/' . $file->file_path; ?>" 
+                            download="<?php echo htmlspecialchars($file->original_file_name); ?>"
+                            class="bg-green-500 text-white font-bold py-2 px-4 rounded-full hover:bg-green-600 transition-colors flex items-center space-x-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                                <span>ดาวน์โหลด</span>
+                            </a>
+                        </div>
+                        
                         <?php
-                            // ดึงนามสกุลไฟล์ออกมาแล้วแปลงเป็นตัวพิมพ์เล็ก
                             $fileExtension = strtolower(pathinfo($file->file_path, PATHINFO_EXTENSION));
                         ?>
 
-                        <div class="mt-4">
-                            <?php if ($fileExtension == 'pdf'): ?>
+                        <div class="mt-4 border-t pt-4">
+                            <?php if($fileExtension == 'pdf'): ?>
                                 <!-- แสดงผลไฟล์ PDF ด้วย Iframe -->
-                                <iframe src="<?php echo URLROOT . '/' . $file->file_path; ?>" class="w-full h-[800px] border rounded-md"></iframe>
-
-                            <?php elseif (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif'])): ?>
+                                <iframe src="<?php echo URLROOT . '/' . $file->file_path; ?>" class="w-full h-[800px] border rounded-md bg-white"></iframe>
+                            
+                            <?php elseif(in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif'])): ?>
                                 <!-- แสดงผลไฟล์รูปภาพ -->
-                                <img src="<?php echo URLROOT . '/' . $file->file_path; ?>" alt="<?php echo htmlspecialchars($file->original_file_name); ?>" class="w-full rounded-md border">
+                                <div class="p-4 bg-white rounded-md">
+                                    <img src="<?php echo URLROOT . '/' . $file->file_path; ?>" alt="<?php echo htmlspecialchars($file->original_file_name); ?>" class="w-full h-auto max-h-[800px] object-contain mx-auto">
+                                </div>
 
                             <?php else: ?>
-                                <!-- ถ้าไม่ใช่ PDF หรือรูปภาพ ให้แสดงเป็นลิงก์ดาวน์โหลด -->
-                                <a href="<?php echo URLROOT . '/' . $file->file_path; ?>" target="_blank" class="inline-block bg-blue-500 text-white font-bold py-2 px-4 rounded-full hover:bg-blue-600">
-                                    ดาวน์โหลด:                                                                                                                                 <?php echo htmlspecialchars($file->original_file_name); ?>
-                                </a>
+                                <!-- ถ้าไม่ใช่ PDF หรือรูปภาพ ให้แสดงข้อความแจ้งเตือน -->
+                                <div class="p-4 bg-yellow-100 text-yellow-800 rounded-md">
+                                    ไม่สามารถแสดงตัวอย่างไฟล์ประเภท '<?php echo $fileExtension; ?>' ได้ กรุณากดปุ่มดาวน์โหลดเพื่อเปิดไฟล์
+                                </div>
                             <?php endif; ?>
                         </div>
-                    <?php endforeach; ?>
-                </div>
+                    </div>
+                <?php endforeach; ?>
             <?php endif; ?>
             <!-- ###################################################### -->
         </div>
