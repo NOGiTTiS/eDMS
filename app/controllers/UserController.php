@@ -5,11 +5,13 @@ class UserController extends Controller {
     }
 
     public function register(){
+        // เรียก DocumentModel มาใช้เพื่อดึงรายชื่อฝ่าย
+        $this->documentModel = $this->model('Document');
+        $departments = $this->documentModel->getDepartments();
+
         // ตรวจสอบว่าเป็น POST request หรือไม่
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
             // ประมวลผลฟอร์ม
-            
-            // 1. Sanitize POST data
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 
             $data = [
@@ -17,54 +19,39 @@ class UserController extends Controller {
                 'username' => trim($_POST['username']),
                 'password' => trim($_POST['password']),
                 'confirm_password' => trim($_POST['confirm_password']),
+                'department_id' => !empty($_POST['department_id']) ? $_POST['department_id'] : null, // รับค่า department
+                'telegram_chat_id' => trim($_POST['telegram_chat_id']), // รับค่า telegram
+                'departments' => $departments, // ส่งรายชื่อฝ่ายกลับไปเผื่อเกิด Error
                 'full_name_err' => '',
                 'username_err' => '',
                 'password_err' => '',
-                'confirm_password_err' => ''
+                'confirm_password_err' => '',
+                'department_id_err' => '' // เพิ่ม error field สำหรับ department
             ];
 
             // 2. Validate Data
-            if(empty($data['full_name'])){
-                $data['full_name_err'] = 'กรุณากรอกชื่อ-สกุล';
-            }
-
-            if(empty($data['username'])){
-                $data['username_err'] = 'กรุณากรอกชื่อผู้ใช้';
-            } else {
-                if($this->userModel->findUserByUsername($data['username'])){
-                    $data['username_err'] = 'ชื่อผู้ใช้นี้ถูกใช้งานแล้ว';
-                }
-            }
-            
-            if(empty($data['password'])){
-                $data['password_err'] = 'กรุณากรอกรหัสผ่าน';
-            } elseif(strlen($data['password']) < 6){
-                $data['password_err'] = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
-            }
-
-            if(empty($data['confirm_password'])){
-                $data['confirm_password_err'] = 'กรุณายืนยันรหัสผ่าน';
-            } else {
-                if($data['password'] != $data['confirm_password']){
-                    $data['confirm_password_err'] = 'รหัสผ่านไม่ตรงกัน';
-                }
-            }
+            if(empty($data['full_name'])) $data['full_name_err'] = 'กรุณากรอกชื่อ-สกุล';
+            if(empty($data['username'])) $data['username_err'] = 'กรุณากรอกชื่อผู้ใช้';
+            else if($this->userModel->findUserByUsername($data['username'])) $data['username_err'] = 'ชื่อผู้ใช้นี้ถูกใช้งานแล้ว';
+            if(empty($data['password'])) $data['password_err'] = 'กรุณากรอกรหัสผ่าน';
+            else if(strlen($data['password']) < 6) $data['password_err'] = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
+            if(empty($data['confirm_password'])) $data['confirm_password_err'] = 'กรุณายืนยันรหัสผ่าน';
+            else if($data['password'] != $data['confirm_password']) $data['confirm_password_err'] = 'รหัสผ่านไม่ตรงกัน';
+            if(empty($data['department_id'])) $data['department_id_err'] = 'กรุณาเลือกฝ่าย'; // ตรวจสอบว่าเลือกฝ่ายหรือไม่
 
             // 3. ตรวจสอบว่าไม่มี error
-            if(empty($data['full_name_err']) && empty($data['username_err']) && empty($data['password_err']) && empty($data['confirm_password_err'])){
+            if(empty($data['full_name_err']) && empty($data['username_err']) && empty($data['password_err']) && empty($data['confirm_password_err']) && empty($data['department_id_err'])){
                 // Validated
-                
-                // 4. Hash Password
                 $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
 
-                // 5. Register User
+                // 5. Register User (เรียกใช้ฟังก์ชัน register ที่เราจะแก้ไขต่อไป)
                 if($this->userModel->register($data)){
                     flash('register_success', 'สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ');
                     header('location: ' . URLROOT . '/user/login');
+                    exit();
                 } else {
                     die('Something went wrong');
                 }
-
             } else {
                 // โหลด view พร้อมกับ error
                 $this->view('user/register', $data);
@@ -77,10 +64,14 @@ class UserController extends Controller {
                 'username' => '',
                 'password' => '',
                 'confirm_password' => '',
+                'department_id' => null,
+                'telegram_chat_id' => '',
+                'departments' => $departments, // ส่งรายชื่อฝ่ายไปให้ View
                 'full_name_err' => '',
                 'username_err' => '',
                 'password_err' => '',
-                'confirm_password_err' => ''
+                'confirm_password_err' => '',
+                'department_id_err' => ''
             ];
             $this->view('user/register', $data);
         }

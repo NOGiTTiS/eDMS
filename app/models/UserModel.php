@@ -25,17 +25,19 @@ class UserModel extends Model
     }
 
     // ฟังก์ชันสำหรับลงทะเบียนผู้ใช้ใหม่
-    public function register($data)
-    {
-        $this->db->query('INSERT INTO users (username, password, full_name, role) VALUES (:username, :password, :full_name, :role)');
+    public function register($data){
+        $this->db->query('INSERT INTO users (username, password, full_name, role, department_id, telegram_chat_id) VALUES (:username, :password, :full_name, :role, :department_id, :telegram_chat_id)');
+        
         // Bind values
         $this->db->bind(':username', $data['username']);
         $this->db->bind(':password', $data['password']);
         $this->db->bind(':full_name', $data['full_name']);
-        $this->db->bind(':role', 'section_head'); // สมมติว่าผู้ใช้ที่สมัครตอนนี้เป็น หัวหน้างาน
+        $this->db->bind(':role', 'section_head'); // กำหนด Role เริ่มต้นเป็น 'section_head'
+        $this->db->bind(':department_id', $data['department_id']);
+        $this->db->bind(':telegram_chat_id', !empty($data['telegram_chat_id']) ? $data['telegram_chat_id'] : null); // ถ้าไม่กรอกให้เป็น NULL
 
         // Execute
-        if ($this->db->execute()) {
+        if($this->db->execute()){
             return true;
         } else {
             return false;
